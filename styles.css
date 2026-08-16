@@ -1,0 +1,1068 @@
+:root {
+  color-scheme: light;
+  --paper: #f2e9d8;
+  --paper-raised: #f8f2e8;
+  --paper-shadow: #e6dac5;
+  --ink: #2b2926;
+  --ink-muted: #6b655d;
+  --line: #b8ae9d;
+  --season-primary: #b95532;
+  --season-secondary: #a48250;
+  --season-wash: rgb(185 85 50 / 12%);
+  --art-surface: #eadcc7;
+  --header-height: 74px;
+  --content-width: 1420px;
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+:root[data-season="spring"] {
+  --season-primary: #b97886;
+  --season-secondary: #87965f;
+  --season-wash: rgb(185 120 134 / 13%);
+  --art-surface: #f0e3e3;
+}
+
+:root[data-season="summer"] {
+  --season-primary: #397e79;
+  --season-secondary: #4b6070;
+  --season-wash: rgb(57 126 121 / 12%);
+  --art-surface: #e2ece8;
+}
+
+:root[data-season="autumn"] {
+  --season-primary: #b95532;
+  --season-secondary: #a48250;
+  --season-wash: rgb(185 85 50 / 12%);
+  --art-surface: #eadcc7;
+}
+
+:root[data-season="winter"] {
+  --season-primary: #747873;
+  --season-secondary: #3f4d5a;
+  --season-wash: rgb(63 77 90 / 10%);
+  --art-surface: #e5e8e7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  position: relative;
+  margin: 0;
+  min-width: 320px;
+  overflow-x: clip;
+  background:
+    radial-gradient(circle at 12% 20%, rgb(255 255 255 / 34%) 0 1px, transparent 2px),
+    radial-gradient(circle at 72% 65%, rgb(43 41 38 / 4%) 0 1px, transparent 2px),
+    var(--paper);
+  background-size: 29px 29px, 37px 37px, auto;
+  color: var(--ink);
+}
+
+.site-status {
+  position: fixed;
+  z-index: 100;
+  top: 50%;
+  left: 50%;
+  max-width: min(36rem, calc(100vw - 40px));
+  margin: 0;
+  padding: 14px 20px;
+  border: 1px solid var(--line);
+  background: var(--paper-raised);
+  color: var(--ink-muted);
+  box-shadow: 0 16px 48px rgb(43 41 38 / 12%);
+  transform: translate(-50%, -50%);
+  line-height: 1.8;
+  text-align: center;
+}
+
+.site-status.is-error {
+  border-color: var(--season-primary);
+  color: var(--ink);
+}
+
+.en-thread-canvas {
+  position: fixed;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  pointer-events: none;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: var(--season-primary);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.28em;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.site-header {
+  position: fixed;
+  z-index: 20;
+  top: 0;
+  left: 0;
+  right: 0;
+  min-height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 14px clamp(20px, 4vw, 64px);
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 62%, transparent);
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(14px);
+  transform: translateY(0);
+  transition: transform 260ms ease;
+}
+
+.site-header.is-hidden {
+  transform: translateY(calc(-100% - 3px));
+}
+
+.artist-identity {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  text-decoration: none;
+}
+
+.artist-name {
+  font-size: 1.05rem;
+  letter-spacing: 0.15em;
+}
+
+.header-links,
+.footer-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: clamp(14px, 2vw, 28px);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+}
+
+.header-links a,
+.footer-links a {
+  text-decoration: none;
+}
+
+.header-links a:hover,
+.footer-links a:hover {
+  color: var(--season-primary);
+}
+
+main {
+  position: relative;
+  z-index: 1;
+  width: min(100%, var(--content-width));
+  margin: 0 auto;
+  padding: var(--header-height) clamp(20px, 5vw, 78px) 0;
+}
+
+.opening {
+  position: relative;
+  isolation: isolate;
+  min-height: min(76vh, 760px);
+  display: grid;
+  align-content: center;
+  grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.7fr);
+  column-gap: clamp(40px, 9vw, 150px);
+  padding: 80px 0 108px;
+  border-bottom: 1px solid var(--line);
+}
+
+.opening > :not(.opening-visual) {
+  position: relative;
+  z-index: 2;
+}
+
+.opening-visual {
+  position: absolute;
+  z-index: 1;
+  top: 7%;
+  right: -3%;
+  bottom: 8%;
+  width: min(58%, 760px);
+  margin: 0;
+  overflow: hidden;
+  opacity: 0.25;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgb(0 0 0 / 45%) 24%, #000 58%);
+  mask-image: linear-gradient(90deg, transparent 0%, rgb(0 0 0 / 45%) 24%, #000 58%);
+}
+
+.opening-visual img,
+.opening-visual-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.opening-visual img {
+  display: none;
+}
+
+.opening-visual.has-image img {
+  display: block;
+}
+
+.opening-visual.has-image .opening-visual-placeholder {
+  display: none;
+}
+
+.opening-visual-placeholder {
+  display: block;
+  background:
+    radial-gradient(circle at 66% 38%, transparent 0 19%, var(--season-primary) 19.4% 20.6%, transparent 21%),
+    repeating-radial-gradient(ellipse at 48% 54%, transparent 0 44px, rgb(43 41 38 / 24%) 45px 47px, transparent 48px 86px),
+    linear-gradient(142deg, #e3d5bf 8%, #f7efdf 48%, color-mix(in srgb, var(--season-secondary) 36%, #cab99d));
+  filter: saturate(0.82) contrast(0.94);
+}
+
+.issue-mark,
+.eyebrow,
+.control-label,
+.result-count,
+.work-number,
+.track-position,
+.last-updated,
+.detail-art figcaption {
+  color: var(--ink-muted);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.issue-mark {
+  grid-column: 1 / -1;
+  color: var(--season-primary);
+  margin: 0 0 24px;
+}
+
+.opening h1 {
+  max-width: 13ch;
+  margin: 0;
+  font-size: clamp(2.5rem, 7vw, 6.8rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+.control-room {
+  display: flex;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.control-room > div {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.control-label {
+  margin: 0;
+}
+
+.segmented {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.segmented button,
+.series-chip {
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+  font: inherit;
+}
+
+.segmented button {
+  min-width: 44px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+}
+
+.segmented button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper-raised);
+}
+
+.collection {
+  padding: 116px 0 150px;
+}
+
+.collection-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 36px;
+}
+
+.collection-heading h2,
+.artist-statement h2,
+.related-section h2 {
+  margin: 8px 0 0;
+  font-size: clamp(2.1rem, 4.2vw, 4.5rem);
+  font-weight: 400;
+}
+
+.eyebrow,
+.result-count {
+  margin: 0;
+}
+
+.series-filters {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 0 28px;
+  scrollbar-width: thin;
+}
+
+.series-chip {
+  flex: 0 0 auto;
+  padding: 8px 15px;
+  border-bottom: 1px solid transparent;
+}
+
+.series-chip:hover {
+  color: var(--ink);
+}
+
+.series-chip[aria-pressed="true"] {
+  border-bottom-color: var(--season-primary);
+  color: var(--ink);
+}
+
+.collection-pagination-settings {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 0 0 22px;
+}
+
+.works {
+  display: block;
+}
+
+.work-card {
+  padding: clamp(58px, 8vw, 112px) 0;
+  border-top: 1px solid var(--line);
+}
+
+.work-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.work-heading > div:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.work-number {
+  margin: 0;
+  color: var(--season-primary);
+}
+
+.work-heading h3 {
+  margin: 0;
+  font-size: clamp(1.65rem, 3vw, 3.2rem);
+  font-weight: 400;
+}
+
+.work-heading h3 a {
+  text-decoration: none;
+}
+
+.work-meta-compact,
+.detail-year {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--ink-muted);
+  font-size: 0.88rem;
+}
+
+.sale-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+}
+
+.sale-state::before {
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--season-primary);
+  border-radius: 50%;
+  content: "";
+}
+
+.work-track {
+  display: flex;
+  gap: clamp(14px, 2vw, 30px);
+  overflow-x: auto;
+  padding: 0 8vw 14px 0;
+  scroll-snap-type: x mandatory;
+  scrollbar-color: var(--season-primary) transparent;
+  scrollbar-width: thin;
+}
+
+.art-frame {
+  flex: 0 0 min(76vw, 920px);
+  height: clamp(310px, 58vw, 760px);
+  display: block;
+  scroll-snap-align: start;
+  text-decoration: none;
+}
+
+.art-surface {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--art-surface);
+  box-shadow: 0 18px 48px rgb(43 41 38 / 10%);
+}
+
+.art-surface img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.track-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 13px;
+}
+
+.track-navigation {
+  display: flex;
+  gap: 8px;
+}
+
+.track-button {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+}
+
+.track-button:hover {
+  border-color: var(--season-primary);
+  color: var(--season-primary);
+}
+
+.track-position {
+  margin: 0;
+  text-align: right;
+}
+
+.empty-result {
+  padding: 80px 0;
+  color: var(--ink-muted);
+}
+
+.pagination {
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) auto minmax(90px, 1fr);
+  align-items: center;
+  gap: 18px;
+  padding-top: 36px;
+  border-top: 1px solid var(--line);
+}
+
+.pagination p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+}
+
+.pagination button {
+  width: max-content;
+  padding: 9px 0;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+}
+
+.pagination button:last-child {
+  justify-self: end;
+}
+
+.pagination button:hover:not(:disabled) {
+  border-bottom-color: var(--season-primary);
+}
+
+.pagination button:disabled {
+  color: var(--line);
+  cursor: default;
+}
+
+:root[data-view="collection"] .works {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(24px, 4vw, 58px);
+}
+
+:root[data-view="collection"] .work-card {
+  min-width: 0;
+  padding: 42px 0;
+}
+
+:root[data-view="collection"] .work-heading {
+  display: block;
+  margin-top: 18px;
+  margin-bottom: 0;
+}
+
+:root[data-view="collection"] .work-heading > div:first-child {
+  display: block;
+}
+
+:root[data-view="collection"] .work-heading h3 {
+  margin-top: 8px;
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+}
+
+:root[data-view="collection"] .work-meta-compact {
+  margin-top: 9px;
+}
+
+:root[data-view="collection"] .track-footer {
+  display: none;
+}
+
+:root[data-view="collection"] .work-track {
+  display: block;
+  padding: 0;
+  overflow: visible;
+  aspect-ratio: 4 / 5;
+}
+
+:root[data-view="collection"] .art-frame {
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+
+:root[data-view="collection"] .art-frame:first-child {
+  display: block;
+}
+
+:root[data-view="collection"] .work-heading {
+  order: 2;
+}
+
+:root[data-view="collection"] .work-card {
+  display: flex;
+  flex-direction: column;
+}
+
+:root[data-view="collection"] .work-track {
+  order: 1;
+}
+
+:root[data-view="collection"] .track-position {
+  display: none;
+}
+
+.artist-statement {
+  margin: 0 calc(clamp(20px, 5vw, 78px) * -1);
+  padding: 5% clamp(20px, 10vw, 150px);
+  background: color-mix(in srgb, var(--season-wash) 72%, rgb(248 242 232 / 86%));
+  border-top: 1px solid var(--line);
+}
+
+.statement-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas: "introduction statement";
+  gap: clamp(34px, 8vw, 120px);
+  margin-top: 58px;
+}
+
+.statement-introduction {
+  grid-area: introduction;
+}
+
+.statement-body {
+  grid-area: statement;
+}
+
+.statement-column-label {
+  display: block;
+  margin-bottom: 18px;
+  color: var(--season-primary);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+}
+
+.statement-columns p {
+  margin: 0;
+  font-size: clamp(1rem, 1.4vw, 1.18rem);
+  line-height: 2.2;
+  /* 出力画面で入力した作家紹介・ステートメントの改行を保持する。 */
+  white-space: pre-line;
+}
+
+.en-knot-finale {
+  position: relative;
+  height: clamp(167px, 20vw, 260px);
+  margin: 0 calc(clamp(20px, 5vw, 78px) * -1);
+  pointer-events: none;
+}
+
+.en-knot-finale span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.site-footer {
+  position: relative;
+  z-index: 1;
+  width: min(100%, var(--content-width));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 28px 60px;
+  padding: 70px clamp(20px, 5vw, 78px) 46px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+}
+
+.footer-name {
+  margin: 0 0 9px;
+  color: var(--ink);
+  font-size: 0.92rem;
+  letter-spacing: 0.1em;
+}
+
+[data-footer-external-links] {
+  display: contents;
+}
+
+.site-footer p {
+  margin-top: 0;
+}
+
+.footer-policy-link {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.footer-policy-link:hover,
+.footer-policy-link:focus-visible {
+  color: var(--ink);
+}
+
+:root.policy-open {
+  overflow: hidden;
+}
+
+.policy-dialog {
+  width: min(620px, calc(100vw - 40px));
+  padding: 0;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 24px 80px rgb(32 27 23 / 24%);
+}
+
+.policy-dialog::backdrop {
+  background: rgb(24 21 19 / 36%);
+  backdrop-filter: blur(2px);
+}
+
+.policy-dialog-panel {
+  position: relative;
+  max-height: min(70vh, 720px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding: clamp(28px, 6vw, 52px);
+}
+
+.policy-dialog h2 {
+  margin: 8px 44px 30px 0;
+  font-size: clamp(1.7rem, 4vw, 2.35rem);
+  font-weight: 400;
+}
+
+.policy-dialog section + section {
+  margin-top: 34px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+}
+
+.policy-dialog h3 {
+  margin: 0 0 14px;
+  font-size: 0.96rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+.policy-dialog section p {
+  margin: 0 0 12px;
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+  line-height: 1.85;
+}
+
+.policy-close {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.policy-close:hover,
+.policy-close:focus-visible {
+  border-color: var(--season-primary);
+  color: var(--season-primary);
+}
+
+.policy-updated {
+  margin: 30px 0 0;
+  color: var(--ink-muted);
+  font-size: 0.72rem;
+}
+
+.last-updated {
+  grid-column: 1 / -1;
+  margin: 16px 0 0;
+}
+
+.work-detail-main {
+  padding-bottom: 150px;
+}
+
+.back-link {
+  display: inline-block;
+  margin: 32px 0 72px;
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+}
+
+.detail-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 52px;
+}
+
+.detail-heading h1 {
+  margin: 10px 0 0;
+  font-size: clamp(3rem, 8vw, 8rem);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.detail-gallery {
+  display: grid;
+  gap: clamp(50px, 8vw, 120px);
+}
+
+.detail-art {
+  width: 100%;
+  margin: 0;
+}
+
+.detail-art .art-surface {
+  height: min(72vw, 940px);
+}
+
+.detail-art figcaption {
+  margin-top: 12px;
+  text-align: right;
+}
+
+.detail-information {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.7fr) minmax(0, 1.2fr);
+  gap: clamp(48px, 10vw, 160px);
+  margin: 140px 0 180px;
+  padding-top: 36px;
+  border-top: 1px solid var(--line);
+}
+
+.detail-information dl {
+  margin: 0;
+}
+
+.detail-information dl > div {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 20px;
+  padding: 14px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+}
+
+.detail-information dt {
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+}
+
+.detail-information dd {
+  margin: 0;
+}
+
+.detail-statement > p:last-child {
+  margin: 28px 0 0;
+  font-size: clamp(1.12rem, 2vw, 1.55rem);
+  line-height: 2.1;
+  /* 作品の公開キャプションに含まれる改行を作品詳細へ反映する。 */
+  white-space: pre-line;
+}
+
+.related-section {
+  padding-top: 70px;
+  border-top: 1px solid var(--line);
+}
+
+.related-works {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(20px, 4vw, 52px);
+  margin-top: 42px;
+}
+
+.related-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.related-card .art-surface {
+  grid-column: 1 / -1;
+  height: clamp(220px, 30vw, 430px);
+}
+
+.related-title {
+  font-size: 1.15rem;
+}
+
+.related-year {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 820px) {
+  :root {
+    --header-height: 66px;
+  }
+
+  .header-links a:first-child {
+    display: none;
+  }
+
+  .opening {
+    min-height: auto;
+    grid-template-columns: 1fr;
+    gap: 34px;
+    padding: 72px 0 86px;
+  }
+
+  .opening-visual {
+    top: 9%;
+    right: -28%;
+    bottom: 18%;
+    width: 90%;
+    opacity: 0.17;
+  }
+
+  .en-thread-canvas {
+    opacity: 0.72;
+  }
+
+  .control-room {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .collection {
+    padding-top: 84px;
+  }
+
+  .work-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .art-frame {
+    flex-basis: 84vw;
+    height: 58vh;
+    min-height: 340px;
+  }
+
+  :root[data-view="collection"] .works {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .statement-columns,
+  .detail-information {
+    grid-template-columns: 1fr;
+  }
+
+  .statement-columns {
+    grid-template-areas:
+      "introduction"
+      "statement";
+  }
+
+  .related-works {
+    grid-template-columns: 1fr;
+  }
+
+  .related-card {
+    grid-template-columns: 1fr auto;
+  }
+
+  .site-footer {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+}
+
+@media (max-width: 520px) {
+  .site-header {
+    padding-inline: 16px;
+  }
+
+  .header-links {
+    gap: 12px;
+  }
+
+  .header-links a {
+    font-size: 0.68rem;
+  }
+
+  main {
+    padding-inline: 16px;
+  }
+
+  .opening h1 {
+    font-size: clamp(2.55rem, 16vw, 4.5rem);
+  }
+
+  .collection-pagination-settings {
+    justify-content: space-between;
+  }
+
+  :root[data-view="collection"] .works {
+    grid-template-columns: 1fr;
+  }
+
+  .artist-statement {
+    margin-inline: -16px;
+    padding-inline: 24px;
+  }
+
+  .site-footer {
+    padding-inline: 16px;
+  }
+
+  .policy-dialog {
+    width: calc(100vw - 32px);
+  }
+
+  .policy-dialog-panel {
+    max-height: 78vh;
+    padding: 30px 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .site-header {
+    transition: none;
+  }
+
+  .policy-dialog-panel {
+    scroll-behavior: auto;
+  }
+}

@@ -1,0 +1,28 @@
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 公開サイトへローカル環境の設定・資格情報を混入させない。
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+
+# DB・ログ・バックアップは公開サイトの成果物に含めない。
+*.db
+*.sqlite
+*.sqlite3
+logs/
+setting/
+settings/
+backup/
+
+# エディタ固有設定は公開しない。
+.idea/
+.vscode/
+
+json/portfolio.previous.json
