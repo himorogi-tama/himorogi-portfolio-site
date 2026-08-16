@@ -561,6 +561,8 @@ main {
 
 :root[data-view="collection"] .work-card {
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   padding: 42px 0;
 }
 
@@ -589,19 +591,41 @@ main {
 
 :root[data-view="collection"] .work-track {
   display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   padding: 0;
-  overflow: visible;
+  overflow: hidden;
   aspect-ratio: 4 / 5;
 }
 
 :root[data-view="collection"] .art-frame {
   display: none;
+  flex: none;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   height: 100%;
 }
 
 :root[data-view="collection"] .art-frame:first-child {
   display: block;
+}
+
+/*
+ * 展示表示用の横長 flex 幅や画像固有の寸法が一覧グリッドへ漏れると、
+ * Safari では隣の作品へ重なって見えることがある。一覧時は画像までの
+ * 全階層をカード幅以内へ固定し、各作品を独立した描画領域として扱う。
+ */
+:root[data-view="collection"] .art-surface,
+:root[data-view="collection"] .art-surface img {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+:root[data-view="collection"] .art-surface {
+  contain: layout paint;
 }
 
 :root[data-view="collection"] .work-heading {
