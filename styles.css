@@ -933,18 +933,27 @@ main {
   }
 
   .opening {
-    min-height: auto;
+    width: 100vw;
+    min-height: clamp(390px, 56svh, 540px);
+    margin-left: calc(50% - 50vw);
+    overflow: hidden;
     grid-template-columns: 1fr;
     gap: 34px;
-    padding: 72px 0 86px;
+    padding: clamp(58px, 8vh, 78px) clamp(20px, 5vw, 48px);
   }
 
   .opening-visual {
-    top: 9%;
-    right: -28%;
-    bottom: 18%;
-    width: 90%;
-    opacity: 0.17;
+    inset: 0;
+    width: 100%;
+    opacity: 0.18;
+    -webkit-mask-image: linear-gradient(90deg, rgb(0 0 0 / 10%) 0%, rgb(0 0 0 / 64%) 44%, #000 100%);
+    mask-image: linear-gradient(90deg, rgb(0 0 0 / 10%) 0%, rgb(0 0 0 / 64%) 44%, #000 100%);
+  }
+
+  .opening h1 {
+    max-width: min(12ch, 82vw);
+    font-size: clamp(3rem, 11vw, 5.5rem);
+    overflow-wrap: anywhere;
   }
 
   .en-thread-canvas {
@@ -972,7 +981,39 @@ main {
   }
 
   :root[data-view="collection"] .works {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(16px, 3vw, 28px);
+  }
+
+  :root[data-view="collection"] .work-card {
+    padding: 24px 0;
+  }
+
+  :root[data-view="collection"] .work-heading {
+    margin-top: 12px;
+  }
+
+  :root[data-view="collection"] .work-heading > div:first-child {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    gap: 7px;
+  }
+
+  :root[data-view="collection"] .work-heading h3 {
+    min-width: 0;
+    margin-top: 0;
+    font-size: clamp(1rem, 2.7vw, 1.3rem);
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+
+  :root[data-view="collection"] .work-meta-compact {
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    margin-top: 6px;
+    font-size: 0.74rem;
+    line-height: 1.45;
   }
 
   .statement-columns,
@@ -1022,8 +1063,15 @@ main {
     padding-inline: 16px;
   }
 
+  .opening {
+    min-height: clamp(330px, 50svh, 440px);
+    padding-inline: 16px;
+  }
+
   .opening h1 {
-    font-size: clamp(2.55rem, 16vw, 4.5rem);
+    max-width: 88vw;
+    font-size: clamp(2.45rem, 13vw, 4rem);
+    line-height: 1.12;
   }
 
   .collection-pagination-settings {
@@ -1031,7 +1079,31 @@ main {
   }
 
   :root[data-view="collection"] .works {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  :root[data-view="collection"] .work-card {
+    padding: 18px 0;
+  }
+
+  :root[data-view="collection"] .work-number {
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+  }
+
+  :root[data-view="collection"] .work-heading > div:first-child {
+    gap: 5px;
+  }
+
+  :root[data-view="collection"] .work-heading h3 {
+    font-size: clamp(0.92rem, 4.2vw, 1.08rem);
+  }
+
+  :root[data-view="collection"] .work-meta-compact {
+    display: grid;
+    gap: 2px;
+    font-size: 0.68rem;
   }
 
   .artist-statement {

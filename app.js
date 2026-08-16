@@ -77,7 +77,19 @@
     document.querySelectorAll("[data-view-button]").forEach(button => {
       button.setAttribute("aria-pressed", String(button.dataset.viewButton === value));
     });
+    document.querySelectorAll(".work-track img").forEach(image => {
+      image.sizes = indexImageSizes(value);
+    });
     scheduleEnThreadLayout();
+  }
+
+  /** 表示形式と端末幅に合わせ、ブラウザが過大な画像を選ばないsizesを返す。 */
+  function indexImageSizes(value = root.dataset.view) {
+    return value === "collection"
+      ? "(max-width: 520px) calc((100vw - 46px) / 2), "
+        + "(max-width: 820px) calc((100vw - 96px) / 3), "
+        + "calc((100vw - 180px) / 3)"
+      : "(max-width: 820px) 84vw, 76vw";
   }
 
   function buildIndex() {
@@ -230,7 +242,7 @@
     image.src = setting.src;
     if (setting.srcset) {
       image.srcset = setting.srcset;
-      image.sizes = "(max-width: 820px) 90vw, 58vw";
+      image.sizes = "(max-width: 820px) 100vw, 58vw";
     }
     if (setting.width && setting.height) {
       image.width = setting.width;
@@ -687,7 +699,7 @@
       surface.className = "art-surface";
       surface.append(createResponsiveImage(
         image,
-        "(max-width: 820px) 84vw, min(76vw, 920px)",
+        indexImageSizes(),
         "lazy"
       ));
       link.append(surface);
@@ -1084,8 +1096,9 @@
       node.textContent = Number.isNaN(updated.getTime())
         ? `最終更新：${data.generatedAt}`
         : `最終更新：${new Intl.DateTimeFormat("ja-JP", {
-          dateStyle: "medium",
-          timeStyle: "short"
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
         }).format(updated)}`;
     });
   }
