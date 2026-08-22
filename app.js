@@ -3,6 +3,11 @@
 
   const root = document.documentElement;
   const body = document.body;
+  // 感想受付はこのサイト固有の外部フォームとし、公開JSONやアプリの出力仕様へ依存させない。
+  const feedbackFormLink = Object.freeze({
+    label: "感想・意見箱",
+    url: "https://docs.google.com/forms/d/e/1FAIpQLSfOkD9FYmpEiZBkLMINY4Z_9yLsBBsCxOgYdMsdcqTKz3prqw/viewform?usp=header"
+  });
   configureSitePolicy();
 
   const siteRootUrl = new URL("./", document.baseURI);
@@ -1104,8 +1109,8 @@
   }
 
   function rebuildNavigationLinks() {
-    // 本サイトからの外部導線は、各種案内を集約したXだけに限定する。
-    const links = data.artist.links.filter(link => {
+    // 作家の公式導線はXだけを公開JSONから採用し、その隣へサイト固有の感想フォームを置く。
+    const xLinks = data.artist.links.filter(link => {
       try {
         const host = new URL(link.url).hostname.toLowerCase();
         return link.label.trim().toLowerCase() === "x"
@@ -1117,6 +1122,7 @@
         return false;
       }
     }).slice(0, 1);
+    const externalLinks = [...xLinks, feedbackFormLink];
     const header = document.querySelector(".header-links");
     if (header) {
       header.replaceChildren();
@@ -1124,13 +1130,13 @@
         header.append(createLink("作品一覧", "index.html"));
       }
       header.append(createLink("作家紹介", "index.html#statement"));
-      links.forEach(link => header.append(
+      externalLinks.forEach(link => header.append(
         createLink(link.label, link.url, true)
       ));
     }
     document.querySelectorAll("[data-footer-external-links]").forEach(host => {
       host.replaceChildren();
-      links.forEach(link => host.append(
+      externalLinks.forEach(link => host.append(
         createLink(link.label, link.url, true)
       ));
     });
