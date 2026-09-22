@@ -1044,7 +1044,7 @@
       case "sold":
         return "販売済み";
       case "not_for_sale":
-        return "";
+        return "非売";
       default:
         throw new Error(`販売状態が不正です: ${sale.status}`);
     }
