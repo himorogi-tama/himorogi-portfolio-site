@@ -924,7 +924,16 @@ main {
   margin: -112px 0 140px;
 }
 
+.detail-share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .share-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 46px;
   padding: 10px 24px;
   border: 1px solid var(--ink);
@@ -932,6 +941,7 @@ main {
   color: var(--ink);
   background: color-mix(in srgb, var(--paper) 86%, transparent);
   font: inherit;
+  text-decoration: none;
   cursor: pointer;
 }
 

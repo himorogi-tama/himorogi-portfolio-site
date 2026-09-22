@@ -803,7 +803,10 @@
         </div>` : ""}
       </div>
       <div class="detail-share">
-        <button type="button" class="share-button" data-share-work>この作品を共有</button>
+        <div class="detail-share-actions">
+          <a class="share-button" data-share-x target="_blank" rel="noopener noreferrer">Xで共有</a>
+          <button type="button" class="share-button" data-share-work>その他の共有</button>
+        </div>
         <p class="share-status" data-share-status role="status" aria-live="polite"></p>
       </div>
     `;
@@ -828,10 +831,21 @@
    */
   function configureWorkShare(work) {
     const button = document.querySelector("[data-share-work]");
+    const xLink = document.querySelector("[data-share-x]");
     const status = document.querySelector("[data-share-status]");
-    if (!button || !status) {
+    if (!button || !xLink || !status) {
       return;
     }
+    const url = new URL(
+      `work.html?id=${encodeURIComponent(work.id)}`,
+      document.baseURI
+    ).href;
+    const text = buildShareText(work);
+    const xIntent = new URL("https://twitter.com/intent/tweet");
+    xIntent.searchParams.set("text", text);
+    xIntent.searchParams.set("url", url);
+    xLink.href = xIntent.href;
+
     let preparedFiles = [];
     let filesReady = false;
     prepareShareFiles(work).then(files => {
@@ -840,11 +854,6 @@
     });
 
     button.addEventListener("click", async () => {
-      const url = new URL(
-        `work.html?id=${encodeURIComponent(work.id)}`,
-        document.baseURI
-      ).href;
-      const text = buildShareText(work);
       const basicPayload = { title: work.title, text, url };
       status.textContent = "";
       if (typeof navigator.share === "function") {
@@ -865,13 +874,10 @@
             status.textContent = "共有をキャンセルしました。";
             return;
           }
-          // 端末共有が失敗した場合も、文章とURLを失わないようコピーへ切り替える。
+          // 端末共有が失敗した場合は、下部の状態表示で利用できないことを伝える。
         }
       }
-      const copied = await copyShareText(`${text}\n${url}`.trim());
-      status.textContent = copied
-        ? "共有文と作品URLをコピーしました。"
-        : "この端末では共有機能を利用できませんでした。";
+      status.textContent = "この端末・ブラウザではその他の共有を利用できませんでした。";
     });
   }
 
@@ -910,18 +916,6 @@
     } catch (_error) {
       // 画像が未準備でも本文とURLの共有は継続できるため、画面エラーにはしない。
       return [];
-    }
-  }
-
-  async function copyShareText(value) {
-    if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
-      return false;
-    }
-    try {
-      await navigator.clipboard.writeText(value);
-      return true;
-    } catch (_error) {
-      return false;
     }
   }
 
