@@ -802,7 +802,13 @@
           <p>${multilineHtml(work.statement)}</p>
         </div>` : ""}
       </div>
+      <div class="detail-share">
+        <button type="button" class="share-button" data-share-work>この作品を共有</button>
+        <p class="share-status" data-share-status role="status" aria-live="polite"></p>
+      </div>
     `;
+
+    configureWorkShare(work);
 
     const related = data.works
       .filter(candidate => candidate.id !== work.id)
@@ -814,6 +820,109 @@
       .slice(0, 3);
     const relatedHost = document.querySelector("[data-related-works]");
     related.forEach(item => relatedHost.append(createRelatedCard(item.work)));
+  }
+
+  /**
+   * Web Share APIで端末標準の共有先を開く。
+   * 共有先アプリ名はブラウザから取得できないため、サイト共通の本文とタグだけを渡す。
+   */
+  function configureWorkShare(work) {
+    const button = document.querySelector("[data-share-work]");
+    const status = document.querySelector("[data-share-status]");
+    if (!button || !status) {
+      return;
+    }
+    let preparedFiles = [];
+    let filesReady = false;
+    prepareShareFiles(work).then(files => {
+      preparedFiles = files;
+      filesReady = true;
+    });
+
+    button.addEventListener("click", async () => {
+      const url = new URL(
+        `work.html?id=${encodeURIComponent(work.id)}`,
+        document.baseURI
+      ).href;
+      const text = buildShareText(work);
+      const basicPayload = { title: work.title, text, url };
+      status.textContent = "";
+      if (typeof navigator.share === "function") {
+        const payload = { ...basicPayload };
+        // 画像準備が間に合い、端末がJPEG共有を受け付ける場合だけ先頭3枚を添付する。
+        if (filesReady
+            && preparedFiles.length
+            && typeof navigator.canShare === "function"
+            && navigator.canShare({ ...basicPayload, files: preparedFiles })) {
+          payload.files = preparedFiles;
+        }
+        try {
+          await navigator.share(payload);
+          status.textContent = "共有先へ渡しました。";
+          return;
+        } catch (error) {
+          if (error && error.name === "AbortError") {
+            status.textContent = "共有をキャンセルしました。";
+            return;
+          }
+          // 端末共有が失敗した場合も、文章とURLを失わないようコピーへ切り替える。
+        }
+      }
+      const copied = await copyShareText(`${text}\n${url}`.trim());
+      status.textContent = copied
+        ? "共有文と作品URLをコピーしました。"
+        : "この端末では共有機能を利用できませんでした。";
+    });
+  }
+
+  function buildShareText(work) {
+    const bodyText = data.share.textTemplate
+      .replaceAll("{title}", work.title)
+      .replaceAll("{artist}", data.artist.name)
+      .trim();
+    const hashtags = data.share.hashtags
+      .map(tag => `#${tag}`)
+      .join(" ");
+    return [bodyText, hashtags].filter(Boolean).join("\n\n");
+  }
+
+  /** ページ表示中に先頭3枚を準備し、共有ボタンのユーザー操作を待たせない。 */
+  async function prepareShareFiles(work) {
+    if (typeof File !== "function" || typeof fetch !== "function") {
+      return [];
+    }
+    try {
+      return await Promise.all(work.images.slice(0, 3).map(async (image, index) => {
+        const response = await fetch(image.src);
+        if (!response.ok) {
+          throw new Error(`共有画像を取得できませんでした: ${response.status}`);
+        }
+        const blob = await response.blob();
+        if (blob.type && blob.type !== "image/jpeg") {
+          throw new Error("共有画像がJPEGではありません。");
+        }
+        return new File(
+          [blob],
+          `${work.id}-${String(index + 1).padStart(2, "0")}.jpg`,
+          { type: "image/jpeg" }
+        );
+      }));
+    } catch (_error) {
+      // 画像が未準備でも本文とURLの共有は継続できるため、画面エラーにはしない。
+      return [];
+    }
+  }
+
+  async function copyShareText(value) {
+    if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
+      return false;
+    }
+    try {
+      await navigator.clipboard.writeText(value);
+      return true;
+    } catch (_error) {
+      return false;
+    }
   }
 
   function createRelatedCard(work) {
@@ -894,6 +1003,7 @@
     const artist = requireObject(site.artist, "site.artist");
     const theme = requireObject(site.theme, "site.theme");
     const pagination = requireObject(site.pagination, "site.pagination");
+    const share = adaptShare(site.share);
     const tagEntries = requireArray(payload.seriesFilters, "seriesFilters");
     const tagNames = new Map(tagEntries.map(tag => [
       requireText(tag.id, "seriesFilters.id"),
@@ -976,8 +1086,32 @@
         ? Number(pagination.defaultPageSize)
         : pageSizeOptions[0],
       pageSizeOptions,
+      share,
       seriesFilters: tagEntries.map(tag => tag.label),
       works
+    };
+  }
+
+  /** 古い公開JSONでも作品共有を壊さず、次回出力から設定値へ移行する。 */
+  function adaptShare(value) {
+    if (value == null) {
+      return {
+        textTemplate: "作品「{title}」をご覧ください。\n{artist} 作品集",
+        hashtags: []
+      };
+    }
+    const source = requireObject(value, "site.share");
+    if (typeof source.textTemplate !== "string") {
+      throw new Error("site.share.textTemplateは文字列で指定してください。");
+    }
+    const hashtags = requireArray(source.hashtags, "site.share.hashtags")
+      .map((tag, index) => requireText(tag, `site.share.hashtags[${index}]`));
+    if (hashtags.some(tag => /[#＃\s]/u.test(tag))) {
+      throw new Error("共有ハッシュタグには#や空白を含められません。");
+    }
+    return {
+      textTemplate: source.textTemplate,
+      hashtags: [...new Set(hashtags)]
     };
   }
 
