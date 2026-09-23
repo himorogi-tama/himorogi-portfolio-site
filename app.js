@@ -3,6 +3,8 @@
 
   const root = document.documentElement;
   const body = document.body;
+  // リロード時だけChromeの自動復元を止め、トップページをopeningから表示する。
+  const indexScrollRestoration = prepareIndexScrollRestoration();
   // 感想受付はこのサイト固有の外部フォームとし、公開JSONやアプリの出力仕様へ依存させない。
   const feedbackFormLink = Object.freeze({
     label: "感想・意見箱",
@@ -61,6 +63,42 @@
     return;
   }
   markSiteReady();
+  indexScrollRestoration.restore();
+
+  /**
+   * 一覧を後から組み立てるページでは、Chromeの標準スクロール復元が短い初期DOMを基準に
+   * 座標を丸め、先頭作品付近へずれる。リロードはopeningから始め、通常遷移とアンカーは守る。
+   */
+  function prepareIndexScrollRestoration() {
+    if (body.dataset.page !== "index") {
+      return { restore() {} };
+    }
+    const navigation = window.performance.getEntriesByType?.("navigation")?.[0];
+    const legacyReload = window.performance.navigation?.type === 1;
+    const shouldReset = !window.location.hash
+      && (navigation?.type === "reload" || legacyReload);
+    if (shouldReset && "scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    return {
+      restore() {
+        if (!shouldReset) {
+          return;
+        }
+        const resetPosition = () => window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => {
+            window.scrollTo({ top: 0, behavior: "auto" });
+          });
+        });
+        if (document.fonts?.ready) {
+          document.fonts.ready.then(resetPosition);
+        } else {
+          resetPosition();
+        }
+      }
+    };
+  }
 
   function applySeason(value) {
     root.dataset.season = value;
