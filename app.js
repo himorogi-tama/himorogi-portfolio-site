@@ -898,7 +898,7 @@
       status.textContent = "";
       if (typeof navigator.share === "function") {
         const payload = { ...basicPayload };
-        // 画像準備が間に合い、端末がJPEG共有を受け付ける場合だけ先頭3枚を添付する。
+        // 画像準備が間に合い、端末がJPEG共有を受け付ける場合だけ代表画像1枚を添付する。
         if (filesReady
             && preparedFiles.length
             && typeof navigator.canShare === "function"
@@ -932,27 +932,26 @@
     return [bodyText, hashtags].filter(Boolean).join("\n\n");
   }
 
-  /** ページ表示中に先頭3枚を準備し、共有ボタンのユーザー操作を待たせない。 */
+  /** ページ表示中に代表画像1枚を準備し、共有先で複数画像の連投にならないようにする。 */
   async function prepareShareFiles(work) {
     if (typeof File !== "function" || typeof fetch !== "function") {
       return [];
     }
     try {
-      return await Promise.all(work.images.slice(0, 3).map(async (image, index) => {
-        const response = await fetch(image.src);
-        if (!response.ok) {
-          throw new Error(`共有画像を取得できませんでした: ${response.status}`);
-        }
-        const blob = await response.blob();
-        if (blob.type && blob.type !== "image/jpeg") {
-          throw new Error("共有画像がJPEGではありません。");
-        }
-        return new File(
-          [blob],
-          `${work.id}-${String(index + 1).padStart(2, "0")}.jpg`,
-          { type: "image/jpeg" }
-        );
-      }));
+      const image = work.representativeImage || work.images[0];
+      const response = await fetch(image.src);
+      if (!response.ok) {
+        throw new Error(`共有画像を取得できませんでした: ${response.status}`);
+      }
+      const blob = await response.blob();
+      if (blob.type && blob.type !== "image/jpeg") {
+        throw new Error("共有画像がJPEGではありません。");
+      }
+      return [new File(
+        [blob],
+        `${work.id}-representative.jpg`,
+        { type: "image/jpeg" }
+      )];
     } catch (_error) {
       // 画像が未準備でも本文とURLの共有は継続できるため、画面エラーにはしない。
       return [];
@@ -1067,6 +1066,16 @@
       if (!images.length) {
         throw new Error(`作品「${work.title || workIndex}」に公開画像がありません。`);
       }
+      const representativeMediaId = requireText(
+        work.representativeMediaId,
+        `works[${workIndex}].representativeMediaId`
+      );
+      const representativeImage = images.find(
+        image => image.id === representativeMediaId
+      );
+      if (!representativeImage) {
+        throw new Error(`作品「${work.title || workIndex}」の代表画像が見つかりません。`);
+      }
       return {
         id: requireText(work.publicId, `works[${workIndex}].publicId`),
         title: requireText(work.title, `works[${workIndex}].title`),
@@ -1079,6 +1088,7 @@
         dimensions: optionalText(work.dimensions),
         weight: optionalText(work.weight),
         statement: optionalText(work.caption),
+        representativeImage,
         images
       };
     });
@@ -1173,6 +1183,7 @@
     const display = adaptVariant(variants.display, `${fieldName}.variants.display`);
     const detail = adaptVariant(variants.detail, `${fieldName}.variants.detail`);
     return {
+      id: requireText(source.id, `${fieldName}.id`),
       alt: requireText(source.alt, `${fieldName}.alt`),
       src: display.src,
       srcset: `${thumbnail.src} ${thumbnail.width}w, ${display.src} ${display.width}w, ${detail.src} ${detail.width}w`,
