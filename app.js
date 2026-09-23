@@ -836,14 +836,16 @@
     if (!button || !xLink || !status) {
       return;
     }
+    // 共有時だけOGP付きの作品別HTMLを使う。通常のサイト内遷移は従来のwork.htmlのまま。
     const url = new URL(
-      `work.html?id=${encodeURIComponent(work.id)}`,
-      document.baseURI
+      `share/${encodeURIComponent(work.id)}/`,
+      data.publicBaseUrl
     ).href;
     const text = buildShareText(work);
+    const xText = [text, url].filter(Boolean).join("\n");
     const xIntent = new URL("https://twitter.com/intent/tweet");
-    xIntent.searchParams.set("text", text);
-    xIntent.searchParams.set("url", url);
+    // URLを別パラメータにせず本文末尾へ入れ、タグ直後の改行位置を固定する。
+    xIntent.searchParams.set("text", xText);
     xLink.href = xIntent.href;
 
     let preparedFiles = [];
@@ -1045,6 +1047,7 @@
 
     return {
       siteTitle: requireText(site.title, "site.title"),
+      publicBaseUrl: adaptPublicBaseUrl(site.publicBaseUrl),
       generatedAt: requireText(payload.generatedAt, "generatedAt"),
       artist: {
         name: requireText(artist.name, "site.artist.name"),
@@ -1084,6 +1087,19 @@
       seriesFilters: tagEntries.map(tag => tag.label),
       works
     };
+  }
+
+  /** 旧JSONは現在表示中のサイトルートを使い、新JSONでは公開先を明示する。 */
+  function adaptPublicBaseUrl(value) {
+    if (value == null) {
+      return siteRootUrl.href;
+    }
+    const url = new URL(requireText(value, "site.publicBaseUrl"));
+    if (url.protocol !== "https:" || url.username || url.password
+        || url.search || url.hash) {
+      throw new Error("site.publicBaseUrlはHTTPSのサイトルートを指定してください。");
+    }
+    return url.href.endsWith("/") ? url.href : `${url.href}/`;
   }
 
   /** 古い公開JSONでも作品共有を壊さず、次回出力から設定値へ移行する。 */
