@@ -143,7 +143,11 @@ a:focus-visible {
   display: flex;
   align-items: baseline;
   gap: 14px;
-  text-decoration: none;
+  text-decoration-line: underline;
+  text-decoration-color: var(--season-primary);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.38em;
+  transition: color 180ms ease, text-decoration-thickness 180ms ease;
 }
 
 .artist-name {
@@ -163,13 +167,25 @@ a:focus-visible {
 }
 
 .header-links a,
-.footer-links a {
-  text-decoration: none;
+.footer-links a,
+.footer-policy-link {
+  text-decoration-line: underline;
+  text-decoration-color: var(--season-primary);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.38em;
+  transition: color 180ms ease, text-decoration-thickness 180ms ease;
 }
 
+.artist-identity:hover,
+.artist-identity:focus-visible,
 .header-links a:hover,
-.footer-links a:hover {
+.header-links a:focus-visible,
+.footer-links a:hover,
+.footer-links a:focus-visible,
+.footer-policy-link:hover,
+.footer-policy-link:focus-visible {
   color: var(--season-primary);
+  text-decoration-thickness: 2px;
 }
 
 main {
@@ -410,7 +426,17 @@ main {
 }
 
 .work-heading h3 a {
-  text-decoration: none;
+  text-decoration-line: underline;
+  text-decoration-color: var(--season-primary);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition: color 180ms ease, text-decoration-thickness 180ms ease;
+}
+
+.work-heading h3 a:hover,
+.work-heading h3 a:focus-visible {
+  color: var(--season-primary);
+  text-decoration-thickness: 2px;
 }
 
 .work-meta-compact,
@@ -533,11 +559,15 @@ main {
   width: max-content;
   padding: 9px 0;
   border: 0;
-  border-bottom: 1px solid transparent;
   background: transparent;
   color: var(--ink);
   cursor: pointer;
   font: inherit;
+  text-decoration-line: underline;
+  text-decoration-color: var(--season-primary);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.38em;
+  transition: color 180ms ease, text-decoration-thickness 180ms ease;
 }
 
 .pagination button:last-child {
@@ -545,12 +575,14 @@ main {
 }
 
 .pagination button:hover:not(:disabled) {
-  border-bottom-color: var(--season-primary);
+  color: var(--season-primary);
+  text-decoration-thickness: 2px;
 }
 
 .pagination button:disabled {
   color: var(--line);
   cursor: default;
+  text-decoration-color: var(--line);
 }
 
 :root[data-view="collection"] .works {
@@ -745,7 +777,7 @@ main {
 
 .footer-policy-link:hover,
 .footer-policy-link:focus-visible {
-  color: var(--ink);
+  color: var(--season-primary);
 }
 
 :root.policy-open {
@@ -943,11 +975,27 @@ main {
   font: inherit;
   text-decoration: none;
   cursor: pointer;
+  box-shadow: 0 0 0 rgb(43 41 38 / 0%);
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
 
-.share-button:hover {
-  color: var(--paper);
-  background: var(--ink);
+.share-button:hover,
+.share-button:focus-visible {
+  border-color: var(--season-primary);
+  color: var(--paper-raised);
+  background: var(--season-primary);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--season-primary) 24%, transparent);
+  transform: translateY(-2px);
+}
+
+.share-button:active {
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--season-primary) 18%, transparent);
+  transform: translateY(0) scale(0.98);
 }
 
 .share-status {
@@ -983,6 +1031,17 @@ main {
 
 .related-title {
   font-size: 1.15rem;
+  text-decoration-line: underline;
+  text-decoration-color: var(--season-primary);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.28em;
+  transition: color 180ms ease, text-decoration-thickness 180ms ease;
+}
+
+.related-card:hover .related-title,
+.related-card:focus-visible .related-title {
+  color: var(--season-primary);
+  text-decoration-thickness: 2px;
 }
 
 .related-year {
@@ -1199,6 +1258,23 @@ main {
 
   .site-header {
     transition: none;
+  }
+
+  .artist-identity,
+  .header-links a,
+  .footer-links a,
+  .footer-policy-link,
+  .work-heading h3 a,
+  .pagination button,
+  .share-button,
+  .related-title {
+    transition: none;
+  }
+
+  .share-button:hover,
+  .share-button:focus-visible,
+  .share-button:active {
+    transform: none;
   }
 
   .policy-dialog-panel {
