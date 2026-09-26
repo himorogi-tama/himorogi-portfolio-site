@@ -26,7 +26,9 @@
   const pageSizeKey = "portfolio-site-page-size";
   const storedPageSize = Number.parseInt(safeStorageGet(pageSizeKey), 10);
   const indexState = {
-    activeSeries: "すべて",
+    activeYearRange: null,
+    activeSale: null,
+    activeSeries: new Set(),
     currentPage: 1,
     pageSize: data.pageSizeOptions.includes(storedPageSize)
       ? storedPageSize
@@ -148,27 +150,197 @@
     );
     configurePaginationControls();
 
-    const allSeries = Array.from(new Set(data.works.flatMap(work => work.series)));
-    const filterHost = document.querySelector("[data-series-filters]");
+    configureWorkFilters();
 
-    ["すべて", ...allSeries].forEach(series => {
+    renderWorks();
+  }
+
+  /**
+   * 制作年は単一年または範囲、販売状態は単一選択、シリーズは複数選択で構成する。
+   * シリーズ内はOR、異なる軸同士はrenderWorksでANDとして評価する。
+   */
+  function configureWorkFilters() {
+    const years = Array.from(new Set(data.works.map(work => work.year)))
+      .map(year => Number(year))
+      .filter(Number.isSafeInteger)
+      .sort((left, right) => left - right);
+    configureYearRangeFilter(years);
+
+    const publicSaleOptions = [
+      { value: "for_sale", label: "販売可能" },
+      { value: "reserved", label: "予約済み" },
+      { value: "sold", label: "販売済み" },
+      { value: "not_for_sale", label: "非売" }
+    ].filter(option => data.works.some(work => work.sale === option.value));
+    buildSingleSelectFilter(
+      document.querySelector("[data-sale-filters]"),
+      [{ value: null, label: "すべて" }, ...publicSaleOptions],
+      () => indexState.activeSale,
+      value => { indexState.activeSale = value; }
+    );
+
+    configureSeriesFilter();
+  }
+
+  /**
+   * 年の候補数に比例してUIが横へ伸びないよう、開始年と終了年を個別に選ぶ。
+   * 両方を同じ年にすると単一年、離すと両端を含む範囲として扱う。
+   */
+  function configureYearRangeFilter(years) {
+    const startSelect = document.querySelector("[data-year-start]");
+    const endSelect = document.querySelector("[data-year-end]");
+    const summary = document.querySelector("[data-year-range-summary]");
+    const clearButton = document.querySelector("[data-year-range-clear]");
+    if (!years.length || !startSelect || !endSelect || !summary || !clearButton) {
+      return;
+    }
+
+    const minimumYear = years[0];
+    const maximumYear = years[years.length - 1];
+    [startSelect, endSelect].forEach(select => {
+      years.forEach(year => {
+        const option = document.createElement("option");
+        option.value = String(year);
+        option.textContent = `${year}年`;
+        select.append(option);
+      });
+      select.disabled = minimumYear === maximumYear;
+    });
+    startSelect.value = String(minimumYear);
+    endSelect.value = String(maximumYear);
+
+    const applyRange = changedSelect => {
+      let start = Number(startSelect.value);
+      let end = Number(endSelect.value);
+      if (start > end) {
+        if (changedSelect === startSelect) {
+          end = start;
+          endSelect.value = String(end);
+        } else {
+          start = end;
+          startSelect.value = String(start);
+        }
+      }
+
+      const coversAllYears = start === minimumYear && end === maximumYear;
+      indexState.activeYearRange = coversAllYears ? null : { start, end };
+      summary.textContent = coversAllYears
+        ? "すべて"
+        : start === end
+          ? `${start}年`
+          : `${start}–${end}年`;
+      clearButton.disabled = coversAllYears;
+      indexState.currentPage = 1;
+      renderWorks();
+    };
+
+    startSelect.addEventListener("change", () => applyRange(startSelect));
+    endSelect.addEventListener("change", () => applyRange(endSelect));
+    clearButton.addEventListener("click", () => {
+      startSelect.value = String(minimumYear);
+      endSelect.value = String(maximumYear);
+      applyRange(null);
+    });
+    applyRange(null);
+  }
+
+  function buildSingleSelectFilter(host, options, currentValue, updateValue) {
+    if (!host) {
+      return;
+    }
+    options.forEach(option => {
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "series-chip";
-      button.textContent = series;
-      button.setAttribute("aria-pressed", String(series === indexState.activeSeries));
+      button.textContent = option.label;
+      button.setAttribute("aria-pressed", String(option.value === currentValue()));
       button.addEventListener("click", () => {
-        indexState.activeSeries = series;
+        updateValue(option.value);
         indexState.currentPage = 1;
-        filterHost.querySelectorAll("button").forEach(item => {
+        host.querySelectorAll("button").forEach(item => {
           item.setAttribute("aria-pressed", String(item === button));
         });
         renderWorks();
       });
-      filterHost.append(button);
+      host.append(button);
+    });
+  }
+
+  function configureSeriesFilter() {
+    const details = document.querySelector("[data-series-filter]");
+    const optionHost = document.querySelector("[data-series-options]");
+    const clearButton = document.querySelector("[data-series-clear]");
+    if (!details || !optionHost || !clearButton) {
+      return;
+    }
+
+    const series = Array.from(new Set(data.works.flatMap(work => work.series)));
+    series.forEach((label, index) => {
+      const option = document.createElement("label");
+      option.className = "series-filter-option";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = label;
+      checkbox.id = `series-filter-${index + 1}`;
+      // ラベルとの対応を明示し、読み上げ環境でもシリーズ名を選択肢名として扱えるようにする。
+      option.htmlFor = checkbox.id;
+      checkbox.addEventListener("change", () => {
+        if (checkbox.checked) {
+          indexState.activeSeries.add(label);
+        } else {
+          indexState.activeSeries.delete(label);
+        }
+        indexState.currentPage = 1;
+        updateSeriesFilterSummary();
+        renderWorks();
+      });
+      const text = document.createElement("span");
+      text.textContent = label;
+      option.append(checkbox, text);
+      optionHost.append(option);
     });
 
-    renderWorks();
+    clearButton.addEventListener("click", () => {
+      indexState.activeSeries.clear();
+      optionHost.querySelectorAll('input[type="checkbox"]').forEach(input => {
+        input.checked = false;
+      });
+      indexState.currentPage = 1;
+      updateSeriesFilterSummary();
+      renderWorks();
+    });
+
+    details.addEventListener("keydown", event => {
+      if (event.key === "Escape" && details.open) {
+        details.open = false;
+        details.querySelector("summary")?.focus();
+      }
+    });
+    document.addEventListener("click", event => {
+      if (details.open && !details.contains(event.target)) {
+        details.open = false;
+      }
+    });
+    updateSeriesFilterSummary();
+  }
+
+  function updateSeriesFilterSummary() {
+    const summary = document.querySelector("[data-series-summary]");
+    const count = document.querySelector("[data-series-selection-count]");
+    const clearButton = document.querySelector("[data-series-clear]");
+    const selected = Array.from(indexState.activeSeries);
+    if (summary) {
+      summary.textContent = selected.length === 0
+        ? "すべて"
+        : selected.length <= 2
+          ? selected.join("・")
+          : `${selected[0]} ほか${selected.length - 1}件`;
+    }
+    if (count) {
+      count.textContent = `${selected.length}件選択`;
+    }
+    if (clearButton) {
+      clearButton.disabled = selected.length === 0;
+    }
   }
 
   function buildControls(host, items, type) {
@@ -238,9 +410,17 @@
     const host = document.querySelector("[data-works]");
     const empty = document.querySelector("[data-empty]");
     const count = document.querySelector("[data-result-count]");
-    const visible = indexState.activeSeries === "すべて"
-      ? data.works
-      : data.works.filter(work => work.series.includes(indexState.activeSeries));
+    const visible = data.works.filter(work => {
+      const workYear = Number(work.year);
+      const matchesYear = indexState.activeYearRange == null
+        || (workYear >= indexState.activeYearRange.start
+          && workYear <= indexState.activeYearRange.end);
+      const matchesSale = indexState.activeSale == null
+        || work.sale === indexState.activeSale;
+      const matchesSeries = indexState.activeSeries.size === 0
+        || work.series.some(series => indexState.activeSeries.has(series));
+      return matchesYear && matchesSale && matchesSeries;
+    });
     const totalPages = Math.max(1, Math.ceil(visible.length / indexState.pageSize));
     indexState.currentPage = Math.min(
       totalPages,
@@ -250,11 +430,46 @@
     const pageWorks = visible.slice(pageStart, pageStart + indexState.pageSize);
 
     host.replaceChildren();
-    pageWorks.forEach((work, index) => host.append(createWorkCard(work, pageStart + index)));
+    appendWorksByYear(host, pageWorks, pageStart);
     empty.hidden = visible.length !== 0;
     count.textContent = `${visible.length}作品`;
     updatePaginationControls(totalPages, visible.length);
     scheduleEnThreadLayout();
+  }
+
+  /**
+   * 一覧表示では年セクションとして描画し、展示表示ではCSSのdisplay: contentsで
+   * 見出しとラッパーを外した従来どおりの連続表示にする。
+   */
+  function appendWorksByYear(host, works, pageStart) {
+    const groups = new Map();
+    works.forEach((work, index) => {
+      if (!groups.has(work.year)) {
+        groups.set(work.year, []);
+      }
+      groups.get(work.year).push({ work, index: pageStart + index });
+    });
+
+    groups.forEach((entries, year) => {
+      const section = document.createElement("section");
+      section.className = "work-year-group";
+      section.setAttribute("aria-labelledby", `work-year-${year}`);
+
+      const heading = document.createElement("h3");
+      heading.className = "work-year-heading";
+      heading.id = `work-year-${year}`;
+      const yearText = document.createElement("span");
+      yearText.textContent = year;
+      const itemCount = document.createElement("span");
+      itemCount.textContent = `${entries.length}作品`;
+      heading.append(yearText, itemCount);
+
+      const grid = document.createElement("div");
+      grid.className = "work-year-grid";
+      entries.forEach(entry => grid.append(createWorkCard(entry.work, entry.index)));
+      section.append(heading, grid);
+      host.append(section);
+    });
   }
 
   function updatePaginationControls(totalPages, totalWorks) {

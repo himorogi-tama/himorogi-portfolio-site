@@ -8,8 +8,8 @@
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260925-1">
-  <script src="app.js?v=20260923-2" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260926-6">
+  <script src="app.js?v=20260926-3" defer></script>
 </head>
 <body id="top" data-page="index">
   <p class="site-status" data-site-status role="status">作品情報を読み込んでいます。</p>
@@ -52,7 +52,48 @@
         </div>
         <p class="result-count" data-result-count></p>
       </div>
-      <div class="series-filters" data-series-filters aria-label="シリーズで絞り込む"></div>
+      <div class="work-filters" data-work-filters aria-label="公開作品を絞り込む">
+        <div class="work-filter-group">
+          <p class="control-label">制作年</p>
+          <div class="year-range-filter" data-year-range-filter aria-label="制作年の範囲で絞り込む">
+            <div class="year-range-heading">
+              <output data-year-range-summary>すべて</output>
+              <button type="button" data-year-range-clear disabled>全期間</button>
+            </div>
+            <div class="year-range-inputs">
+              <label>
+                <span>開始</span>
+                <select data-year-start aria-label="制作年の開始年"></select>
+              </label>
+              <span class="year-range-separator" aria-hidden="true">—</span>
+              <label>
+                <span>終了</span>
+                <select data-year-end aria-label="制作年の終了年"></select>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="work-filter-group series-filter-group">
+          <p class="control-label">シリーズ</p>
+          <details class="series-filter" data-series-filter>
+            <summary>
+              <span data-series-summary>すべて</span>
+              <span class="series-filter-arrow" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="series-filter-menu">
+              <div class="series-filter-actions">
+                <p data-series-selection-count>0件選択</p>
+                <button type="button" data-series-clear>すべて解除</button>
+              </div>
+              <div class="series-filter-options" data-series-options></div>
+            </div>
+          </details>
+        </div>
+        <div class="work-filter-group">
+          <p class="control-label">販売状態</p>
+          <div class="segmented work-filter-options" data-sale-filters aria-label="販売状態で絞り込む"></div>
+        </div>
+      </div>
       <div class="collection-pagination-settings">
         <p class="control-label">1ページの表示件数</p>
         <div class="segmented" data-page-size-controls aria-label="1ページの表示件数"></div>
